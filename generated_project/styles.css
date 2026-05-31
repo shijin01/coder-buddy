@@ -1,0 +1,171 @@
+/*
+    styles.css – Calculator UI styling
+    Implements responsive design, CSS variables, and consistent button appearance.
+*/
+
+/* Root variables for easy theming */
+:root {
+    /* Colors */
+    --color-bg: #f5f5f5;
+    --color-primary: #2c3e50;          /* Dark blue/gray for text */
+    --color-secondary: #34495e;        /* Slightly lighter for borders */
+    --color-display-bg: #ffffff;
+    --color-button-bg: #e0e0e0;
+    --color-button-bg-hover: #d5d5d5;
+    --color-button-bg-active: #c0c0c0;
+    --color-button-primary: #2980b9;   /* For operation buttons */
+    --color-button-primary-hover: #3498db;
+    --color-button-primary-active: #1f6391;
+    --color-button-text: #333333;
+    --color-button-primary-text: #ffffff;
+
+    /* Font sizes */
+    --font-size-base: 1rem;
+    --font-size-display: 2rem;
+    --font-size-button: 1.2rem;
+
+    /* Spacing */
+    --spacing-unit: 0.5rem;
+    --spacing-gap: 0.5rem;
+    --border-radius: 0.5rem;
+}
+
+/* Global reset / base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: var(--spacing-unit);
+}
+
+/* Calculator container */
+#calculator {
+    background-color: var(--color-display-bg);
+    max-width: 400px;
+    width: 100%;
+    margin: auto;
+    padding: var(--spacing-unit);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-gap);
+}
+
+/* Display (input) */
+.display {
+    font-size: var(--font-size-display);
+    text-align: right;
+    padding: calc(var(--spacing-unit) * 1.5);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius);
+    background-color: var(--color-display-bg);
+    color: var(--color-primary);
+    cursor: default; /* non‑editable */
+    pointer-events: none; /* ensures no focus outline */
+}
+
+/* Buttons container – CSS Grid */
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-gap);
+}
+
+/* Base button styling */
+.buttons button {
+    font-size: var(--font-size-button);
+    padding: var(--spacing-unit);
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    min-height: 3rem;
+    width: 100%;
+}
+
+.buttons button:hover {
+    background-color: var(--color-button-bg-hover);
+}
+
+.buttons button:active {
+    background-color: var(--color-button-bg-active);
+    transform: scale(0.97);
+}
+
+/* Operation / utility button distinct colors */
+button[data-action="add"],
+button[data-action="subtract"],
+button[data-action="multiply"],
+button[data-action="divide"],
+button[data-action="clear"],
+button[data-action="backspace"] {
+    background-color: var(--color-button-primary);
+    color: var(--color-button-primary-text);
+}
+
+button[data-action="add"]:hover,
+button[data-action="subtract"]:hover,
+button[data-action="multiply"]:hover,
+button[data-action="divide"]:hover,
+button[data-action="clear"]:hover,
+button[data-action="backspace"]:hover {
+    background-color: var(--color-button-primary-hover);
+}
+
+button[data-action="add"]:active,
+button[data-action="subtract"]:active,
+button[data-action="multiply"]:active,
+button[data-action="divide"]:active,
+button[data-action="clear"]:active,
+button[data-action="backspace"]:active {
+    background-color: var(--color-button-primary-active);
+    transform: scale(0.95);
+}
+
+/* Equals button – make it stand out */
+button[data-action="equals"] {
+    background-color: #27ae60; /* green */
+    color: #ffffff;
+}
+
+button[data-action="equals"]:hover {
+    background-color: #2ecc71;
+}
+
+button[data-action="equals"]:active {
+    background-color: #1e8449;
+    transform: scale(0.95);
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 600px) {
+    #calculator {
+        max-width: 100%;
+        padding: var(--spacing-unit);
+    }
+
+    .display {
+        font-size: 1.5rem;
+        padding: var(--spacing-unit);
+    }
+
+    .buttons button {
+        font-size: 1rem;
+        min-height: 2.5rem;
+        padding: calc(var(--spacing-unit) * 0.8);
+    }
+}
