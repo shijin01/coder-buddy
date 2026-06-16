@@ -8,3 +8,7 @@ pip>=25.2
 pydantic>=2.11.7
 python-dotenv>=1.1.1 
 langchain-google-genai>=4.2.4
+fastapi>=0.136.3
+uvicorn>=1.48.0
+sse-starlette>=3.4.4
+langchain-ollama>1.1.0

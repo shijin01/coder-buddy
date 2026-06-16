@@ -28,12 +28,12 @@ Project Plan:
     return ARCHITECT_PROMPT
 
 
-def coder_system_prompt() -> str:
-    CODER_SYSTEM_PROMPT = """
+def coder_system_prompt(job_id:str) -> str:
+    CODER_SYSTEM_PROMPT = f"""
 You are the CODER agent.
 You are implementing a specific engineering task.
 You have access to tools to read and write files.
-
+Your current job_id is {job_id}. You MUST include this job_id every time you call a tool.
 Always:
 - Review all existing files to maintain compatibility.
 - Implement the FULL file content, integrating with other modules.

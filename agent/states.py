@@ -37,4 +37,10 @@ class CoderState(BaseModel):
     task_plan: TaskPlan = Field(description=" The plan for the task to be implemented")
     current_step_idx:int  = Field(0,description=" The index of the current step in the implementation steps")
     current_file_content:Optional[str] = Field(default=None, description=" The content of the file currently edited or created.")
+
+class JobStatus(BaseModel):
+    status: str = Field(description="Current job status: queued, planning, architecting, coding, completed, failed")
+    message: str = Field(description="Detailed message about current job status")
+    current_node: Optional[str] = Field(default=None, description="The current node being processed")
+    progress: Optional[int] = Field(default=0, description="Progress percentage (0-100)")
     
