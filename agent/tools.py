@@ -17,8 +17,14 @@ PROJECT_ROOT = pathlib.Path.cwd() / "generated_project"
 
 def safe_path_for_project(path: str, job_id: str) -> pathlib.Path:
     job_root = (PROJECT_ROOT / job_id).resolve()
-    p = (job_root / path).resolve()
+    filepath = "/".join(path.split("/")[0:-1])
+    if(filepath=="/"):
+        filepath = job_root.absolute()/path
+    else:
+        filepath = job_root.absolute()/filepath/path.split("/")[-1]
+    p = (filepath).resolve()
     if job_root not in p.parents and job_root != p:
+        print(job_root.absolute(),p.absolute(),path,sep=",\t")
         raise ValueError("Attempt to write outside project root")
     return p
 

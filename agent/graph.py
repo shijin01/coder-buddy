@@ -21,7 +21,7 @@ from .tools import *
 
 
 # llm = ChatGroq(model="openai/gpt-oss-120b")
-llm = ChatOllama(model="gemma4")
+llm = ChatOllama(model="llama3.1")
 # llm = ChatOpenAI(model="gpt-5.4-mini")
 
 # llm = ChatGoogleGenerativeAI(model='models/gemini-2.5-flash')

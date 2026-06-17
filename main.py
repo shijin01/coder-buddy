@@ -4,7 +4,7 @@ import json
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from sse_starlette.sse import EventSourceResponse
+from fastapi.sse import EventSourceResponse,ServerSentEvent
 from .agent.graph import agent
 app = FastAPI()
 
@@ -19,7 +19,8 @@ async def generate_source_code(job_id:str,prompt:str):
         
         # Invoke the agent and capture the full state with status updates
         for result in agent.stream({"user_prompt": prompt,"job_id":job_id}):
-        
+            # print("current_status:",result.get("current_status"))
+            # if result.get("current_status")=="architect":
             print(result)
             # Extract status information from the result
             current_node = result.get("current_node", "unknown")
@@ -69,21 +70,25 @@ async def start_generation(request: PromptRequest,background_tasks: BackgroundTa
 
 
 
-@app.get("/stream/{job_id}")
+@app.get("/stream/{job_id}",response_class=EventSourceResponse)
 async def stream_status(job_id:str):
-    async def event_generator():
+        prevstatus={}
         while True:
             job = jobs.get(job_id)
             if not job:
-                yield {"data":json.dumps({"error":"Job not found"})}
+                yield ServerSentEvent(data={"error":"Job not found"})
                 break
-            yield {"data":json.dumps(job)}
-            asyncio.sleep(1)
+            if job["status"]=="failed":
+                yield  ServerSentEvent(data=job)
+                break
+            if prevstatus!=job:
+                prevstatus=job
+                yield  ServerSentEvent(data=job)
+            # await asyncio.sleep(30)
             if job["status"] == "completed":
-                yield {"data":json.dumps({"error":"Job not found"})}
+                yield ServerSentEvent(data="Completed you can download it using the job_id")
                 break
 
-    return EventSourceResponse(event_generator())
 
 
 @app.get("/download/{job_id}")
