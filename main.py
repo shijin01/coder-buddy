@@ -3,13 +3,17 @@ import uuid
 import json
 import logging
 import redis.asyncio as redis
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from fastapi.sse import EventSourceResponse,ServerSentEvent
 from tasks import generate_source_code_task
 from pathlib import Path
 import shutil
+
+from celery_app import celery
+
+from celery_app import celery
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -46,10 +50,24 @@ async def update_job_state(job_id:str,state:dict):
 async def start_generation(request: PromptRequest):
     job_id = str(uuid.uuid4())
     await update_job_state(job_id=job_id,state={"status":"queued","message":"Job added to queue"})
-    generate_source_code_task.delay(job_id, request.prompt)
+    generate_source_code_task.apply_async(
+        args=[job_id, request.prompt], 
+        task_id=job_id
+    )
     return {"job_id":job_id}
 
-
+@app.post("/api/v1/cancel/{job_id}")
+async def cancel_job(job_id: str):
+   
+    await redis_client.set(f"cancel:{job_id}", "1", ex=3600)
+    # Update the Redis state so the SSE stream knows to close
+    await redis_client.setex(
+        f"job:{job_id}",
+        3600,
+        json.dumps({"status": "cancelled", "message": "Job was cancelled by the user."})
+    )
+    
+    return {"message": "Job cancelled successfully."}
 
 @app.get("/stream/{job_id}",response_class=EventSourceResponse)
 async def stream_status(job_id:str):
@@ -72,6 +90,10 @@ async def stream_status(job_id:str):
             break
 
         if job.get("status") == "failed":
+            yield ServerSentEvent(data=job)
+            break
+
+        if job.get("status") == "cancelled":
             yield ServerSentEvent(data=job)
             break
 
