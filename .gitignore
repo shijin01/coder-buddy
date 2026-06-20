@@ -1,3 +1,6 @@
 .env
 .venv
 generated_project
+CELERY_SETUP_GUIDE.md
+TROUBLESHOOTING.md
+__pycache__
