@@ -15,18 +15,38 @@ except ImportError:
 PROJECT_ROOT = pathlib.Path.cwd() / "generated_project"
 
 
+import pathlib
+
+# Assuming PROJECT_ROOT is defined elsewhere, e.g.:
+# PROJECT_ROOT = pathlib.Path("D:/projects")
+
 def safe_path_for_project(path: str, job_id: str) -> pathlib.Path:
     job_root = (PROJECT_ROOT / job_id).resolve()
-    filepath = "/".join(path.split("/")[0:-1])
-    if(filepath=="/"):
-        filepath = job_root.absolute()/path
-    else:
-        filepath = job_root.absolute()/filepath/path.split("/")[-1]
-    p = (filepath).resolve()
-    if job_root not in p.parents and job_root != p:
-        print(job_root.absolute(),p.absolute(),path,sep=",\t")
-        raise ValueError("Attempt to write outside project root")
-    return p
+    path_obj = pathlib.Path(path)
+
+    # 1. Strip ANY root or drive anchor (e.g., '/', '\', or 'C:\')
+    # This safely forces the path to be relative, fixing the Windows leading-slash issue.
+    if path_obj.anchor:
+        path_obj = path_obj.relative_to(path_obj.anchor)
+
+    # 2. Prevent redundant job_id nesting (e.g., if path is "job_123/public/index.html")
+    if path_obj.parts and path_obj.parts[0] == job_id:
+        path_obj = pathlib.Path(*path_obj.parts[1:])
+
+    # 3. Join the cleaned path to the root and RESOLVE it. 
+    final_path = (job_root / path_obj).resolve()
+
+    # 4. Verify the final path is strictly inside the job_root
+    try:
+        final_path.relative_to(job_root)
+    except ValueError:
+        print(f"{job_root.absolute()},\t{final_path.absolute()},\t{path}")
+        raise ValueError(
+            f"Attempt to write outside project root. "
+            f"Expected: {path} ---- Created: {final_path.absolute()}"
+        )
+
+    return final_path
 
 
 @tool
